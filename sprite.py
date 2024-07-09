@@ -1,8 +1,9 @@
 import pygame
 
 
-class Character:
+class Character(pygame.sprite.Sprite):
     def __init__(self, hp: int, x: int, y: int, surface: pygame.Surface, width: int = 20, height: int = 20) -> None:
+        pygame.sprite.Sprite.__init__(self)
         self.hp = hp
         self.x = x
         self.y = y
@@ -11,10 +12,10 @@ class Character:
         self.surface = surface
         
         self.color = 'red'
+        self.rect = pygame.Rect((self.x, self.y), (self.width, self.height))
     
     def update(self):
-        # self.y += 1
-        pass
+        self.rect = pygame.Rect((self.x, self.y), (self.width, self.height))
     
     def draw(self) -> None:
         rect = pygame.Rect((self.x, self.y), (self.width, self.height))

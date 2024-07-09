@@ -12,14 +12,13 @@ class Player(Character):
         self.v_speed = 0
         self.h_speed_max = 8
         self.v_speed_max = 8
-        self.acceleration = 0.2
+        self.acceleration = 0.15
         
         self.score = 0
         self.fire_cd = 100
         self.bullets_num_max = 5
     
     def update(self) -> None:
-        super().update()
         if 0 < self.x + self.h_speed < RESOLUTION[0]-self.width:
             self.x += self.h_speed
         else:
@@ -29,6 +28,7 @@ class Player(Character):
         #     self.y += self.v_speed
         # else:
         #     self.v_speed = 0
+        super().update()
     
     def draw(self) -> None:
         super().draw()

@@ -4,20 +4,25 @@ import math
 from settings import *
 
 
-class Bullet:
+class Bullet(pygame.sprite.Sprite):
     def __init__(self, x: int, y: int, surface: pygame.Surface, angle: float) -> None:
-        self.x = x
-        self.y = y
+        pygame.sprite.Sprite.__init__(self)
+        self.x = x                  # center point
+        self.y = y                  # center point
         self.surface = surface
         self.angle = angle
+        self.radius = 3
+        self.rect = pygame.Rect((self.x-self.radius, self.y-self.radius), 
+                                (self.x+self.radius, self.y+self.radius))
         
         self.color = GREEN
-        self.radius = 3
         self.speed = 7
     
     def update(self) -> None:
         self.x += self.speed * math.cos(self.angle)
         self.y += self.speed * math.sin(self.angle)
+        self.rect = pygame.Rect((self.x-self.radius, self.y-self.radius), 
+                                (self.x+self.radius, self.y+self.radius))
       
     def draw(self) -> None:
         pygame.draw.circle(surface=self.surface, color=self.color, 

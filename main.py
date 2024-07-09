@@ -1,5 +1,6 @@
 import pygame
 import math
+import random
 
 from settings import *
 from enemy import Enemy
@@ -10,6 +11,7 @@ from bullet import Bullet
 class Game:
     def __init__(self) -> None:
         pygame.init()
+        pygame.font.init()
         self.running = True
         self.clock = pygame.time.Clock()
         self.window = pygame.display.set_mode(RESOLUTION)
@@ -21,15 +23,21 @@ class Game:
         self.bottom_bar = pygame.Surface((RESOLUTION[0], BOTTOM_BAR_HEIGHT))
         
         self.player = Player(hp=10, x=RESOLUTION[0]/2, y=MAIN_SCREEN_HEIGHT-50, surface=self.main_screen)
-        e1 = Enemy(hp=10, x=100, y=50, surface=self.main_screen)
-        self.enemys_list = [e1]
-        self.bullets_list = []
+        self.enemys_list = pygame.sprite.Group()
+        self.bullets_list = pygame.sprite.Group()
+        self.enemy_cd = 200
+        # e1 = Enemy(hp=10, x=100, y=50, surface=self.main_screen)
+        # self.enemys_list.add(e1)
         self.last_time_fire = 0
         
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+            if event.type ==ENEMY_SPAWN:
+                rand_x = random.randint(10, RESOLUTION[0]-30)
+                self.enemys_list.add(Enemy(10, rand_x, -19, self.main_screen))
+            print(event.type)
         
         
         keys = pygame.key.get_pressed()
@@ -50,25 +58,30 @@ class Game:
             b_x = self.player.x + (self.player.width/2)
             b_y = self.player.y - 8
             b = Bullet(x=b_x, y=b_y, surface=self.main_screen, angle=math.radians(-90))
-            self.bullets_list.append(b)
+            self.bullets_list.add(b)
             self.last_time_fire = pygame.time.get_ticks()
         
     
     def update(self) -> None:
         
+        # enemys
         enemys_to_delete = []
-        for enemy in self.enemys_list:
+        for enemy in self.enemys_list.sprites():
             enemy.update()
             if not self.is_fit_in_surface(enemy.x, enemy.y, enemy.width, enemy.height, 
                                           surface=enemy.surface):
                 enemys_to_delete.append(enemy)
+            for bullet in pygame.sprite.spritecollide(enemy, self.bullets_list, True):
+                enemy.kill()
+                self.player.score += enemy.value
         for enemy in enemys_to_delete:
-            self.enemys_list.remove(enemy)
+            enemy.kill()
+        pygame.time.set_timer(event=ENEMY_SPAWN , millis=100)
         # print(len(self.enemys_list))                # debuging
         
         # bullets
         bullets_to_delete = []
-        for bullet in self.bullets_list:
+        for bullet in self.bullets_list.sprites():
             bullet.update()
             if not self.is_fit_in_surface(x=bullet.x, y=bullet.y,
                                  width=bullet.radius, height=bullet.radius, 
@@ -76,7 +89,7 @@ class Game:
                 bullets_to_delete.append(bullet)
                 
         for bullet in bullets_to_delete:
-            self.bullets_list.remove(bullet)
+            bullet.kill()
         # print(len(self.bullets_list))                # debuging
         
         self.player.update()
@@ -87,7 +100,9 @@ class Game:
         ####################
         # top bar
         self.top_bar.fill(TOP_BAR_BG)
-        
+        text = pygame.font.SysFont('Comic Sans MS', TOP_BAR_HEIGHT-20).render(f'Score: {self.player.score}', False, TOP_BAR_TEXT)
+        self.top_bar.blit(text, (50, 15))
+                
         ####################
         # main screen
         self.main_screen.fill(MAIN_SCREEN_BG)
