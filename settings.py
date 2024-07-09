@@ -1,2 +1,5 @@
 RESOLUTION = (1280, 820)
 FPS = 60
+
+# colors
+GREEN = (70, 210, 70)
