@@ -13,7 +13,10 @@ class Player(Character):
         self.h_speed_max = 8
         self.v_speed_max = 8
         self.acceleration = 0.2
+        
+        self.score = 0
         self.fire_cd = 100
+        self.bullets_num_max = 5
     
     def update(self) -> None:
         super().update()

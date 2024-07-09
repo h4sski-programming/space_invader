@@ -15,8 +15,13 @@ class Game:
         self.window = pygame.display.set_mode(RESOLUTION)
         pygame.display.set_caption('Space Invader @ h4sski')
         
-        self.player = Player(hp=10, x=RESOLUTION[0]/2, y=RESOLUTION[1]-50, surface=self.window)
-        e1 = Enemy(hp=10, x=100, y=50, surface=self.window)
+        # create 3 surfaces
+        self.top_bar = pygame.Surface((0, TOP_BAR_HEIGHT))
+        self.main_screen = pygame.Surface((0, RESOLUTION[1]-TOP_BAR_HEIGHT-BOTTOM_BAR_HEIGHT))
+        self.bottom_bar = pygame.Surface((0, BOTTOM_BAR_HEIGHT))
+        
+        self.player = Player(hp=10, x=RESOLUTION[0]/2, y=RESOLUTION[1]-50, surface=self.main_screen)
+        e1 = Enemy(hp=10, x=100, y=50, surface=self.main_screen)
         self.enemys_list = [e1]
         self.bullets_list = []
         self.last_time_fire = 0
@@ -44,7 +49,7 @@ class Game:
         if keys[pygame.K_p] and self.can_fire():
             b_x = self.player.x + (self.player.width/2)
             b_y = self.player.y - 8
-            b = Bullet(x=b_x, y=b_y, surface=self.window, angle=math.radians(-90))
+            b = Bullet(x=b_x, y=b_y, surface=self.main_screen, angle=math.radians(-90))
             self.bullets_list.append(b)
             self.last_time_fire = pygame.time.get_ticks()
         
@@ -77,13 +82,29 @@ class Game:
     def draw(self) -> None:
         self.window.fill(0)
         
+        ####################
+        # top bar
+        self.top_bar.fill((250, 50, 50))
+        
+        ####################
+        # main screen
+        self.main_screen.fill((50, 250, 50))
         for enemy in self.enemys_list:
             enemy.draw()
         
         for bullet in self.bullets_list:
             bullet.draw()
-            
+        
         self.player.draw()
+        
+        ####################
+        # bottom bar
+        self.bottom_bar.fill((50, 50, 250))
+        
+        self.window.blit(self.top_bar, (0, 0))
+        self.window.blit(self.main_screen, (0, TOP_BAR_HEIGHT))
+        self.window.blit(self.bottom_bar, (0, RESOLUTION[1] - BOTTOM_BAR_HEIGHT))
+            
         
         pygame.display.flip()
     
@@ -99,6 +120,8 @@ class Game:
     # other methods
     def can_fire(self) -> bool:
         if pygame.time.get_ticks() < self.last_time_fire + self.player.fire_cd:
+            return False
+        if len(self.bullets_list) >= self.player.bullets_num_max:
             return False
         return True
     
