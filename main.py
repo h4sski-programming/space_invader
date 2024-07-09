@@ -15,7 +15,7 @@ class Game:
         self.window = pygame.display.set_mode(RESOLUTION)
         pygame.display.set_caption('Space Invader @ h4sski')
         
-        self.player = Player(hp=10, x=RESOLUTION[0]/2, y=RESOLUTION[1]-100, surface=self.window)
+        self.player = Player(hp=10, x=RESOLUTION[0]/2, y=RESOLUTION[1]-50, surface=self.window)
         e1 = Enemy(hp=10, x=100, y=50, surface=self.window)
         self.enemys_list = [e1]
         self.bullets_list = []
@@ -26,6 +26,7 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
         
+        
         keys = pygame.key.get_pressed()
         
         # move the player
@@ -33,10 +34,11 @@ class Game:
             self.player.move_left()
         if keys[pygame.K_d]:
             self.player.move_right()
-        if keys[pygame.K_w]:
-            self.player.move_up()
-        if keys[pygame.K_s]:
-            self.player.move_down()
+        ### up and down movement diabled, not needed for now.
+        # if keys[pygame.K_w]:
+        #     self.player.move_up()
+        # if keys[pygame.K_s]:
+        #     self.player.move_down()
             
         # fire bullet
         if keys[pygame.K_p] and self.can_fire():
@@ -49,9 +51,16 @@ class Game:
     
     def update(self) -> None:
         
+        enemys_to_delete = []
         for enemy in self.enemys_list:
             enemy.update()
+            if not self.is_on_screen(enemy.x, enemy.y, enemy.width, enemy.height):
+                enemys_to_delete.append(enemy)
+        for enemy in enemys_to_delete:
+            self.enemys_list.remove(enemy)
+        print(len(self.enemys_list))
         
+        # bullets
         bullets_to_delete = []
         for bullet in self.bullets_list:
             bullet.update()
@@ -59,7 +68,7 @@ class Game:
                                  width=bullet.radius, height=bullet.radius):
                 bullets_to_delete.append(bullet)
                 
-        for bullet in bullets_to_delete[::-1]:
+        for bullet in bullets_to_delete:
             self.bullets_list.remove(bullet)
         # print(len(self.bullets_list))
         

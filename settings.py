@@ -1,4 +1,4 @@
-RESOLUTION = (1280, 820)
+RESOLUTION = (600, 800)
 FPS = 60
 
 # colors

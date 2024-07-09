@@ -2,7 +2,7 @@ import pygame
 
 
 class Character:
-    def __init__(self, hp: int, x: int, y: int, surface, width: int = 20, height: int = 20) -> None:
+    def __init__(self, hp: int, x: int, y: int, surface: pygame.Surface, width: int = 20, height: int = 20) -> None:
         self.hp = hp
         self.x = x
         self.y = y
