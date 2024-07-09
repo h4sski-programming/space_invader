@@ -16,11 +16,11 @@ class Game:
         pygame.display.set_caption('Space Invader @ h4sski')
         
         # create 3 surfaces
-        self.top_bar = pygame.Surface((0, TOP_BAR_HEIGHT))
-        self.main_screen = pygame.Surface((0, RESOLUTION[1]-TOP_BAR_HEIGHT-BOTTOM_BAR_HEIGHT))
-        self.bottom_bar = pygame.Surface((0, BOTTOM_BAR_HEIGHT))
+        self.top_bar = pygame.Surface((RESOLUTION[0], TOP_BAR_HEIGHT))
+        self.main_screen = pygame.Surface((RESOLUTION[0], MAIN_SCREEN_HEIGHT))
+        self.bottom_bar = pygame.Surface((RESOLUTION[0], BOTTOM_BAR_HEIGHT))
         
-        self.player = Player(hp=10, x=RESOLUTION[0]/2, y=RESOLUTION[1]-50, surface=self.main_screen)
+        self.player = Player(hp=10, x=RESOLUTION[0]/2, y=MAIN_SCREEN_HEIGHT-50, surface=self.main_screen)
         e1 = Enemy(hp=10, x=100, y=50, surface=self.main_screen)
         self.enemys_list = [e1]
         self.bullets_list = []
@@ -59,23 +59,25 @@ class Game:
         enemys_to_delete = []
         for enemy in self.enemys_list:
             enemy.update()
-            if not self.is_on_screen(enemy.x, enemy.y, enemy.width, enemy.height):
+            if not self.is_fit_in_surface(enemy.x, enemy.y, enemy.width, enemy.height, 
+                                          surface=enemy.surface):
                 enemys_to_delete.append(enemy)
         for enemy in enemys_to_delete:
             self.enemys_list.remove(enemy)
-        print(len(self.enemys_list))
+        # print(len(self.enemys_list))                # debuging
         
         # bullets
         bullets_to_delete = []
         for bullet in self.bullets_list:
             bullet.update()
-            if not self.is_on_screen(x=bullet.x, y=bullet.y,
-                                 width=bullet.radius, height=bullet.radius):
+            if not self.is_fit_in_surface(x=bullet.x, y=bullet.y,
+                                 width=bullet.radius, height=bullet.radius, 
+                                 surface=bullet.surface):
                 bullets_to_delete.append(bullet)
                 
         for bullet in bullets_to_delete:
             self.bullets_list.remove(bullet)
-        # print(len(self.bullets_list))
+        # print(len(self.bullets_list))                # debuging
         
         self.player.update()
     
@@ -84,11 +86,11 @@ class Game:
         
         ####################
         # top bar
-        self.top_bar.fill((250, 50, 50))
+        self.top_bar.fill(TOP_BAR_BG)
         
         ####################
         # main screen
-        self.main_screen.fill((50, 250, 50))
+        self.main_screen.fill(MAIN_SCREEN_BG)
         for enemy in self.enemys_list:
             enemy.draw()
         
@@ -99,7 +101,7 @@ class Game:
         
         ####################
         # bottom bar
-        self.bottom_bar.fill((50, 50, 250))
+        self.bottom_bar.fill(BOTTOM_BAR_BG_)
         
         self.window.blit(self.top_bar, (0, 0))
         self.window.blit(self.main_screen, (0, TOP_BAR_HEIGHT))
@@ -125,14 +127,16 @@ class Game:
             return False
         return True
     
-    def is_on_screen(self, x:int, y:int, width:int, height:int) -> bool:
-        if x > RESOLUTION[0]:
+    def is_fit_in_surface(self, x:int, y:int, width:int, height:int, surface:pygame.Surface) -> bool:
+        surface_rect = surface.get_rect()
+        # print(surface_rect)
+        if x > surface_rect[2]:
             return False
-        if y > RESOLUTION[1]:
+        if y > surface_rect[3]:
             return False
-        if x+width < 0:
+        if x+width < surface_rect[0]:
             return False
-        if y+height < 0:
+        if y+height < surface_rect[1]:
             return False
         return True
 
