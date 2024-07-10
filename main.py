@@ -6,6 +6,7 @@ from settings import *
 from enemy import Enemy
 from player import Player
 from bullet import Bullet
+from bonus import Bonus
 
 
 class Game:
@@ -24,21 +25,20 @@ class Game:
         
         self.player = Player(hp=10, x=RESOLUTION[0]/2, y=MAIN_SCREEN_HEIGHT-50, surface=self.main_screen)
         self.enemys_list = pygame.sprite.Group()
+        self.bonuses_list = pygame.sprite.Group()
         self.bullets_list = pygame.sprite.Group()
-        self.enemy_cd = 200
-        # e1 = Enemy(hp=10, x=100, y=50, surface=self.main_screen)
-        # self.enemys_list.add(e1)
+        self.enemy_cd = 1_000
+        self.enemy_spawn()
         self.last_time_fire = 0
         
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            if event.type ==ENEMY_SPAWN:
+            if event.type == ENEMY_SPAWN:
                 rand_x = random.randint(10, RESOLUTION[0]-30)
-                self.enemys_list.add(Enemy(10, rand_x, -19, self.main_screen))
-            print(event.type)
-        
+                self.enemys_list.add(Enemy(1, rand_x, -19, self.main_screen))
+            
         
         keys = pygame.key.get_pressed()
         
@@ -52,7 +52,13 @@ class Game:
         #     self.player.move_up()
         # if keys[pygame.K_s]:
         #     self.player.move_down()
-            
+        
+        for bonus in pygame.sprite.spritecollide(sprite=self.player, group=self.bonuses_list, dokill=False):
+            self.player.fire_cd = self.player.fire_cd * bonus.fire_cd
+            self.player.acceleration = self.player.acceleration * bonus.acceleration
+            self.player.bullets_num_max += bonus.bullets_num_max
+            bonus.kill()
+        
         # fire bullet
         if keys[pygame.K_p] and self.can_fire():
             b_x = self.player.x + (self.player.width/2)
@@ -69,15 +75,27 @@ class Game:
         for enemy in self.enemys_list.sprites():
             enemy.update()
             if not self.is_fit_in_surface(enemy.x, enemy.y, enemy.width, enemy.height, 
-                                          surface=enemy.surface):
+                                          surface=enemy.surface) or enemy.hp <= 0:
                 enemys_to_delete.append(enemy)
             for bullet in pygame.sprite.spritecollide(enemy, self.bullets_list, True):
-                enemy.kill()
+                enemy.hp -= bullet.power
                 self.player.score += enemy.value
         for enemy in enemys_to_delete:
+            if enemy.bonus_probability > random.random():
+                self.bonus_spawn(enemy)
             enemy.kill()
-        pygame.time.set_timer(event=ENEMY_SPAWN , millis=100)
         # print(len(self.enemys_list))                # debuging
+        
+        # bonuses
+        bonuses_to_delete = []
+        for bonus in self.bonuses_list.sprites():
+            bonus.update()
+            if not self.is_fit_in_surface(bonus.x, bonus.y, bonus.width, bonus.height,
+                                          surface=bonus.surface):
+                bonuses_to_delete.append(bonus)
+        for bonus in bonuses_to_delete:
+            bonus.kill()
+        print(len(self.bonuses_list))                # debuging
         
         # bullets
         bullets_to_delete = []
@@ -108,6 +126,9 @@ class Game:
         self.main_screen.fill(MAIN_SCREEN_BG)
         for enemy in self.enemys_list:
             enemy.draw()
+        
+        for bonus in self.bonuses_list:
+            bonus.draw()
         
         for bullet in self.bullets_list:
             bullet.draw()
@@ -154,6 +175,19 @@ class Game:
         if y+height < surface_rect[1]:
             return False
         return True
+    
+    def enemy_spawn(self) -> None:
+        pygame.time.set_timer(event=ENEMY_SPAWN , millis=self.enemy_cd)
+    
+    def bonus_spawn(self, enemy) -> None:
+        bonus = Bonus(x=enemy.x, y=enemy.y, surface=self.main_screen,
+                      type=random.randint(1,3))
+        self.bonuses_list.add(bonus)
+    
+    def assign_bonus_to_player(self, bonus):
+        pass
+
+
 
 if __name__ == '__main__':
     game = Game()

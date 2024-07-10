@@ -6,16 +6,17 @@ from sprite import Character
 
 class Player(Character):
     def __init__(self, hp: int, x: int, y: int, surface, width: int = 20, height: int = 20) -> None:
-        super().__init__(hp, x, y, surface, width, height)
+        super().__init__(x, y, surface, width, height)
+        self.hp = hp
         self.color = GREEN
         self.h_speed = 0
         self.v_speed = 0
         self.h_speed_max = 8
         self.v_speed_max = 8
-        self.acceleration = 0.15
+        self.acceleration = 0.4
         
         self.score = 0
-        self.fire_cd = 100
+        self.fire_cd = 50
         self.bullets_num_max = 5
     
     def update(self) -> None:

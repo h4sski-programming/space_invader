@@ -17,12 +17,13 @@ class Bullet(pygame.sprite.Sprite):
         
         self.color = GREEN
         self.speed = 7
+        self.power = 1
     
     def update(self) -> None:
         self.x += self.speed * math.cos(self.angle)
         self.y += self.speed * math.sin(self.angle)
         self.rect = pygame.Rect((self.x-self.radius, self.y-self.radius), 
-                                (self.x+self.radius, self.y+self.radius))
+                                (self.radius*2, self.radius*2))
       
     def draw(self) -> None:
         pygame.draw.circle(surface=self.surface, color=self.color, 
